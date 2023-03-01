@@ -76,7 +76,11 @@ func ListenAndServe(listener net.Listener, handler tcp.Handler, closeCh chan str
 			defer func() {
 				wg.Done()
 			}()
+<<<<<<< HEAD
 			handler.Handler(ctx, conn, closeCh)
+=======
+			handler.Handler(ctx, conn)
+>>>>>>> 70f3717 (resp 2023.3.1)
 		}()
 	}
 	wg.Wait() // 等待业务处理完

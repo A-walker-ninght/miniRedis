@@ -2,6 +2,10 @@ package main
 
 import (
 	"fmt"
+<<<<<<< HEAD
+=======
+	"github.com/A-walker-ninght/miniRedis/resp/handler"
+>>>>>>> 70f3717 (resp 2023.3.1)
 	"os"
 
 	"github.com/A-walker-ninght/miniRedis/config"
@@ -37,7 +41,11 @@ func main() {
 		&tcp.Config{
 			Address: fmt.Sprintf("%s:%d", config.Properties.Bind, config.Properties.Port),
 		},
+<<<<<<< HEAD
 		tcp.MakeClientPool(),
+=======
+		handler.MakeHandler(),
+>>>>>>> 70f3717 (resp 2023.3.1)
 	)
 	if err != nil {
 		logger.Error(err)
