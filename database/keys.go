@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/A-walker-ninght/miniRedis/interface/resp"
+	"github.com/A-walker-ninght/miniRedis/lib/utils"
 	"github.com/A-walker-ninght/miniRedis/lib/wildcard"
 	"github.com/A-walker-ninght/miniRedis/resp/reply"
 )
@@ -13,6 +14,9 @@ func execDEL(db *DB, args [][]byte) resp.Reply {
 		keys[i] = string(arg)
 	}
 	deleted := db.Removes(keys...)
+	if deleted > 0 {
+		db.addAof(utils.ToCmdLine2("del", args...))
+	}
 	return reply.MakeIntReply(int64(deleted))
 }
 
@@ -45,6 +49,7 @@ func execKeys(db *DB, args [][]byte) resp.Reply {
 // FLUSHDB
 func execFlushDB(db *DB, args [][]byte) resp.Reply {
 	db.Clear()
+	db.addAof(utils.ToCmdLine2("flushdb", args...))
 	return reply.MakeOKReply()
 }
 
@@ -73,6 +78,7 @@ func execRename(db *DB, args [][]byte) resp.Reply {
 	}
 	db.PutEntry(newk, entry)
 	db.Remove(oldk)
+	db.addAof(utils.ToCmdLine2("rename", args...))
 	return reply.MakeOKReply()
 }
 
@@ -93,6 +99,7 @@ func execRenameNX(db *DB, args [][]byte) resp.Reply {
 	}
 	db.PutEntry(newk, entry)
 	db.Remove(oldk)
+	db.addAof(utils.ToCmdLine2("renamenx", args...))
 	return reply.MakeOKReply()
 }
 

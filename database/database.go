@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/A-walker-ninght/miniRedis/aof"
 	"github.com/A-walker-ninght/miniRedis/config"
 	"github.com/A-walker-ninght/miniRedis/interface/resp"
 	"github.com/A-walker-ninght/miniRedis/lib/logger"
@@ -10,7 +11,8 @@ import (
 )
 
 type Database struct {
-	dbSet []*DB
+	dbSet      []*DB
+	aofHandler *aof.AofHandler
 }
 
 func NewDatabase() *Database {
@@ -23,6 +25,20 @@ func NewDatabase() *Database {
 		db := makeDB()
 		db.index = i
 		database.dbSet[i] = db
+	}
+
+	if config.Properties.AppendOnly {
+		aofHandler, err := aof.NewAofHandler(database)
+		if err != nil {
+			panic(err)
+		}
+		database.aofHandler = aofHandler
+		for _, db := range database.dbSet {
+			sdb := db
+			sdb.addAof = func(line CmdLine) {
+				database.aofHandler.AddAof(sdb.index, line)
+			}
+		}
 	}
 	return database
 }
@@ -42,7 +58,9 @@ func (database *Database) Exec(client resp.Connection, args [][]byte) resp.Reply
 		return execSelect(client, database, args[1:])
 	}
 	dbIndex := client.GetDBIndex()
-
+	if dbIndex >= len(database.dbSet) {
+		return reply.MakeStandardErrReply("ERR DB index is out of range")
+	}
 	db := database.dbSet[dbIndex]
 	return db.Exec(client, args)
 }

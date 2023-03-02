@@ -2,12 +2,10 @@ package dict
 
 import (
 	"sync"
-	"sync/atomic"
 )
 
 type SyncDict struct {
-	m      sync.Map
-	length int32
+	m sync.Map
 }
 
 func NewDict() *SyncDict {
@@ -21,8 +19,12 @@ func (dict *SyncDict) Get(key string) (val interface{}, exists bool) {
 }
 
 func (dict *SyncDict) Len() int {
-	length := atomic.LoadInt32(&dict.length)
-	return int(length)
+	length := 0
+	dict.m.Range(func(key, value interface{}) bool {
+		length++
+		return true
+	})
+	return length
 }
 
 func (dict *SyncDict) Put(key string, val interface{}) (result int) {
@@ -31,7 +33,6 @@ func (dict *SyncDict) Put(key string, val interface{}) (result int) {
 	if existed {
 		return 0
 	}
-	atomic.AddInt32(&dict.length, 1)
 	return 1
 }
 
@@ -41,7 +42,6 @@ func (dict *SyncDict) PutIfAbsent(key string, val interface{}) (result int) {
 		return 0
 	}
 	dict.m.Store(key, val)
-	atomic.AddInt32(&dict.length, 1)
 	return 1
 }
 
@@ -49,7 +49,6 @@ func (dict *SyncDict) PutIfExists(key string, val interface{}) (result int) {
 	_, existed := dict.m.Load(key)
 	if existed {
 		dict.m.Store(key, val)
-		atomic.AddInt32(&dict.length, 1)
 		return 1
 	}
 	return 0
@@ -59,7 +58,6 @@ func (dict *SyncDict) Remove(key string) (result int) {
 	_, existed := dict.m.Load(key)
 	dict.m.Delete(key)
 	if existed {
-		atomic.AddInt32(&dict.length, -1)
 		return 1
 	}
 	return 0
@@ -73,7 +71,7 @@ func (dict *SyncDict) ForEach(consumer Consumer) {
 }
 
 func (dict *SyncDict) Keys() []string {
-	result := make([]string, dict.length)
+	result := make([]string, dict.Len())
 	i := 0
 	dict.m.Range(func(key, value interface{}) bool {
 		result[i] = key.(string)
