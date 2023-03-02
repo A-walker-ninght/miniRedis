@@ -16,10 +16,3 @@ func RegisterCommand(name string, exector ExecFunc, arity int) {
 		arity:   arity,
 	}
 }
-
-func GetAllFunc() (funNames []string) {
-	for key := range cmdTable {
-		funNames = append(funNames, key)
-	}
-	return
-}

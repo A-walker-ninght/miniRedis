@@ -28,7 +28,7 @@ type RespHandler struct {
 
 func MakeHandler() *RespHandler {
 	var db database.DataBase
-	db = database2.NewDatabase()
+	db = database2.NewStandaloneDatabase()
 	return &RespHandler{
 		db: db,
 	}
