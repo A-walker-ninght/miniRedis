@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/A-walker-ninght/miniRedis/interface/database"
 	"github.com/A-walker-ninght/miniRedis/interface/resp"
+	"github.com/A-walker-ninght/miniRedis/lib/utils"
 	"github.com/A-walker-ninght/miniRedis/resp/reply"
 )
 
@@ -25,6 +26,7 @@ func execSet(db *DB, args [][]byte) resp.Reply {
 		Data: val,
 	}
 	db.PutEntry(key, entry)
+	db.addAof(utils.ToCmdLine2("set", args...))
 	return reply.MakeOKReply()
 }
 
@@ -36,6 +38,7 @@ func execSetNX(db *DB, args [][]byte) resp.Reply {
 		Data: val,
 	}
 	result := db.PutIfAbsent(key, entry)
+	db.addAof(utils.ToCmdLine2("setnx", args...))
 	return reply.MakeIntReply(int64(result))
 }
 
@@ -48,6 +51,7 @@ func execGetSet(db *DB, args [][]byte) resp.Reply {
 	if !ok {
 		return reply.MakeNullBulkReply()
 	}
+	db.addAof(utils.ToCmdLine2("getset", args...))
 	return reply.MakeBulkReply(entry.Data.([]byte))
 }
 

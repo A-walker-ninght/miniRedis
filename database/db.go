@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"github.com/A-walker-ninght/miniRedis/datastruct/dict"
 	"github.com/A-walker-ninght/miniRedis/interface/database"
 	"github.com/A-walker-ninght/miniRedis/interface/resp"
@@ -10,8 +9,9 @@ import (
 )
 
 type DB struct {
-	index int
-	data  dict.Dict
+	index  int
+	data   dict.Dict
+	addAof func(line CmdLine)
 }
 
 type ExecFunc func(db *DB, args [][]byte) resp.Reply
@@ -19,7 +19,8 @@ type CmdLine = [][]byte
 
 func makeDB() *DB {
 	return &DB{
-		data: dict.NewDict(),
+		data:   dict.NewDict(),
+		addAof: func(line CmdLine) {},
 	}
 }
 
@@ -27,14 +28,12 @@ func (db *DB) Exec(c resp.Connection, line CmdLine) resp.Reply {
 	// ping set setnx
 	cmdName := strings.ToLower(string(line[0]))
 	cmd, ok := cmdTable[cmdName]
-	fmt.Println(GetAllFunc(), cmd)
 	if !ok {
 		return reply.MakeStandardErrReply("ERR unknown command " + cmdName)
 	}
 	if !validArity(cmd.arity, line) {
 		return reply.MakeArgNumErrReply(cmdName)
 	}
-	fmt.Println(111)
 	fun := cmd.exector
 	return fun(db, line[1:])
 }
