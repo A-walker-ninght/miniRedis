@@ -2,8 +2,8 @@ package handler
 
 import (
 	"context"
-	"github.com/A-walker-ninght/miniRedis/database"
-	databaseInterface "github.com/A-walker-ninght/miniRedis/interface/database"
+	database2 "github.com/A-walker-ninght/miniRedis/database"
+	"github.com/A-walker-ninght/miniRedis/interface/database"
 	"github.com/A-walker-ninght/miniRedis/lib/logger"
 	"github.com/A-walker-ninght/miniRedis/lib/sync/atomic"
 	"github.com/A-walker-ninght/miniRedis/resp/connetion"
@@ -22,13 +22,13 @@ var (
 
 type RespHandler struct {
 	activeConn sync.Map
-	db         databaseInterface.DataBase
+	db         database.DataBase
 	closing    atomic.Boolean
 }
 
 func MakeHandler() *RespHandler {
-	var db databaseInterface.DataBase
-	db = database.NewEchoDatabase()
+	var db database.DataBase
+	db = database2.NewDatabase()
 	return &RespHandler{
 		db: db,
 	}
@@ -71,7 +71,6 @@ func (r *RespHandler) Handler(ctx context.Context, conn net.Conn) {
 			logger.Error("require multi bulk reply")
 			continue
 		}
-
 		result := r.db.Exec(client, repl.Args)
 		if result != nil {
 			_ = client.Write(result.ToBytes())

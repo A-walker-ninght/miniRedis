@@ -1,9 +1,5 @@
 package reply
 
-<<<<<<< HEAD
-=======
-/* pong reply */
->>>>>>> 70f3717 (resp 2023.3.1)
 type PongReply struct {
 }
 
@@ -16,8 +12,6 @@ func (r PongReply) ToBytes() []byte {
 func MakePongReply() *PongReply {
 	return &PongReply{}
 }
-<<<<<<< HEAD
-=======
 
 /* ok reply */
 
@@ -71,4 +65,3 @@ func (n *NoReply) ToBytes() []byte {
 func MakeNoReply() *NoReply {
 	return &NoReply{}
 }
->>>>>>> 70f3717 (resp 2023.3.1)
